@@ -1,228 +1,102 @@
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.*;
 
 public class Grafo {
     private int qtdVertices;
     private int qtdArestas;
-    private ArrayList<Vertice> vertices;
+    private Map<Integer, Set<Integer>> adj; // Lista de adjacência usando um Map
 
     public Grafo(int qtdVertices, int qtdArestas) {
         this.qtdVertices = qtdVertices;
         this.qtdArestas = qtdArestas;
-        this.vertices = new ArrayList<>();
+        this.adj = new HashMap<>();
 
-        // Criar vértices
         for (int i = 0; i < qtdVertices; i++) {
-            this.vertices.add(new Vertice(i));
+            adj.put(i, new HashSet<>()); // Inicializa a lista de vizinhos
         }
 
-        // Criar arestas garantindo todas as condições
+        criarArestas();
+    }
+
+    private void criarArestas() {
         Random random = new Random();
-        Set<String> arestasCriadas = new HashSet<>();
 
-        while (arestasCriadas.size() / 2 < qtdVertices * qtdArestas / 2) {
-            int v1 = random.nextInt(qtdVertices);
-            int v2 = random.nextInt(qtdVertices);
+        for (int v = 0; v < qtdVertices; v++) {
+            while (adj.get(v).size() < qtdArestas) {
+                int novoVizinho = random.nextInt(qtdVertices);
 
-            // Garantir que não aponte para si mesmo e que a aresta não foi criada antes
-            if (v1 != v2 && !arestasCriadas.contains(v1 + "-" + v2)) {
-                // Verificar se ainda pode adicionar arestas nos dois vértices
-                if (vertices.get(v1).getArestas().size() < qtdArestas &&
-                        vertices.get(v2).getArestas().size() < qtdArestas) {
-
-                    // Criar a aresta nos dois sentidos
-                    vertices.get(v1).getArestas().add(new Aresta(v2));
-                    vertices.get(v2).getArestas().add(new Aresta(v1));
-
-                    // Marcar a aresta como criada nos dois sentidos
-                    arestasCriadas.add(v1 + "-" + v2);
-                    arestasCriadas.add(v2 + "-" + v1);
+                // Evita laços e arestas duplicadas
+                if (novoVizinho != v && adj.get(v).size() < qtdArestas && adj.get(novoVizinho).size() < qtdArestas) {
+                    adj.get(v).add(novoVizinho);
+                    adj.get(novoVizinho).add(v); // Grafo não-direcionado
                 }
             }
         }
-    }
-
-
-
-    private int getRandomDestiny(int atual, int qtdArestas) {
-        Random random = new Random();
-        int destino;
-        do {
-            destino = random.nextInt(0, qtdArestas);
-        } while (destino == atual);
-
-        return destino;
-    }
-
-    private List<Integer> getRandomEdgeList(int origin, int bound, int qtdArestas, int verticeAtual) {
-        List<Integer> listaArestas = new ArrayList<>(List.of());
-        Random random = new Random();
-
-        for (int i=0 ; i<= qtdArestas ; i++) {
-
-            do {
-                int aleatorio = random.nextInt(origin, bound);
-                if ((aleatorio != verticeAtual) && (!listaArestas.contains(aleatorio))){
-                    listaArestas.add(aleatorio);
-                }
-            } while (listaArestas.size() <= i);
-
-        }
-        return listaArestas;
     }
 
     public void imprimirGrafo() {
-        for (Vertice vertice : vertices) {
-            System.out.print("Vértice " + vertice.getValor() + " -> ");
-            for (Aresta aresta : vertice.getArestas()) {
-                System.out.print(aresta.getDestino() + " ");
-            }
-            System.out.println();
+        System.out.println("Lista de Adjacência:");
+        for (int v : adj.keySet()) {
+            System.out.println(v + " -> " + adj.get(v));
         }
     }
 
-
     public void buscaProfundidade(int origem, int destino) {
-        Stack<Vertice> pilha = new Stack<>();
+        Stack<Integer> pilha = new Stack<>();
         Set<Integer> visitados = new HashSet<>();
         int interacoes = 0;
 
-        Vertice verticeInicial = getVertice(origem);
+        pilha.push(origem);
 
-        if (verticeInicial == null ) {
-            System.out.println("Vertice inicial não encontrado!");
-        }
+        while (!pilha.isEmpty()) {
+            int atual = pilha.pop();
 
-        pilha.push(verticeInicial);
+            if (visitados.contains(atual)) continue;
 
-        while(!pilha.isEmpty()) {
-            Vertice verticeAtual = pilha.pop();
+            //System.out.println("Visitando: " + atual);
+            visitados.add(atual);
+            interacoes++;
 
-            if (visitados.contains(verticeAtual.getValor())) {
-                continue;
-            }
-
-            System.out.println("Visitando o vertice " + verticeAtual.getValor());
-            visitados.add(verticeAtual.getValor());
-            interacoes ++;
-
-            if (verticeAtual.getValor() == destino){
-                System.out.println("Encontrado o valor buscado! " + destino);
-                System.out.println("Total de interações: " + interacoes);
+            if (atual == destino) {
+                System.out.println("Destino encontrado em " + interacoes + " interações.");
                 return;
             }
 
-            for (Aresta a: verticeAtual.getArestas()) {
-                Vertice vizinho = getVertice(a.getDestino());
-
-                if (vizinho != null && !visitados.contains(vizinho.getValor())){
+            for (int vizinho : adj.get(atual)) {
+                if (!visitados.contains(vizinho)) {
                     pilha.push(vizinho);
                 }
             }
         }
 
-        System.out.println("Vertice de destino Não encontrado!");
-        System.out.println("Total de interações: " + interacoes);
-
+        System.out.println("Destino não encontrado.");
     }
 
-
     public void buscaLargura(int origem, int destino) {
-        Queue<Vertice> fila = new LinkedList<>();
+        Queue<Integer> fila = new LinkedList<>();
         Set<Integer> visitados = new HashSet<>();
         int interacoes = 0;
 
-        Vertice verticeInicial = getVertice(origem);
-
-        if (verticeInicial == null) {
-            System.out.println("Vértice inicial não encontrado!");
-            return;
-        }
-
-        fila.add(verticeInicial);
+        fila.add(origem);
         visitados.add(origem);
 
         while (!fila.isEmpty()) {
-            Vertice verticeAtual = fila.poll();
+            int atual = fila.poll();
+            //System.out.println("Visitando: " + atual);
+            interacoes++;
 
-            System.out.println("Visitando o vértice: " + verticeAtual.getValor());
-            interacoes ++;
-
-            if (verticeAtual.getValor() == destino) {
-                System.out.println("Encontrado o valor buscado! " + destino);
-                System.out.println("Total de interacoes: " + interacoes);
+            if (atual == destino) {
+                System.out.println("Destino encontrado em " + interacoes + " interações.");
                 return;
             }
 
-            for (Aresta a : verticeAtual.getArestas()) {
-                Vertice vizinho = getVertice(a.getDestino());
-
-                if (vizinho != null && !visitados.contains(vizinho.getValor())) {
+            for (int vizinho : adj.get(atual)) {
+                if (!visitados.contains(vizinho)) {
                     fila.add(vizinho);
-                    visitados.add(vizinho.getValor());
+                    visitados.add(vizinho);
                 }
             }
         }
 
-        System.out.println("Vértice de destino não encontrado!");
-        System.out.println("Total de interacoes: " + interacoes);
+        System.out.println("Destino não encontrado.");
     }
-
-    public boolean buscaLimitada(int origem, int destino, int limite) {
-        Set<Integer> visitados = new HashSet<>();
-        AtomicInteger iteracoes = new AtomicInteger(0);
-
-        boolean encontrado = buscaLimitadaRecursiva(getVertice(origem), destino, limite, visitados, 0, iteracoes);
-
-        System.out.println("Total de iterações: " + iteracoes.get());
-        return encontrado;
-    }
-
-    private boolean buscaLimitadaRecursiva(Vertice atual, int destino, int limite, Set<Integer> visitados, int profundidade, AtomicInteger iteracoes) {
-        if (atual == null) {
-            return false;
-        }
-
-        iteracoes.incrementAndGet();
-        System.out.println("Visitando o vértice: " + atual.getValor() + " (Profundidade: " + profundidade + ")");
-
-        if (atual.getValor() == destino) {
-            System.out.println("Encontrado o destino: " + destino);
-            return true;
-        }
-
-        if (profundidade >= limite) {
-            System.out.println("Limite de profundidade atingido no vértice " + atual.getValor());
-            return false;
-        }
-
-        visitados.add(atual.getValor());
-
-        for (Aresta a : atual.getArestas()) {
-            Vertice vizinho = getVertice(a.getDestino());
-
-            if (vizinho != null && !visitados.contains(vizinho.getValor())) {
-                if (buscaLimitadaRecursiva(vizinho, destino, limite, visitados, profundidade + 1, iteracoes)) {
-                    return true;
-                }
-            }
-        }
-
-        return false;
-    }
-
-
-    public Vertice getVertice(int valor) {
-        for (Vertice vertice : vertices) {
-            if (vertice.getValor() == valor) {
-                return vertice;
-            }
-        }
-        return null;
-    }
-
-    public ArrayList<Vertice> getVertices() {
-        return this.vertices;
-    }
-
 }
