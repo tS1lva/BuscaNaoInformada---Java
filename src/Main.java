@@ -13,7 +13,7 @@ public class Main {
         // Tenta gerar o grafo até conseguir
         while (!criado) {
             try {
-                grafo = new Grafo(10000, 9999);
+                grafo = new Grafo(500, 3);
                 criado = true;
             } catch (Exception e) {
                 System.out.println(YELLOW + "Não foi possível criar o grafo, tentando novamente..." + RESET);
@@ -23,21 +23,21 @@ public class Main {
         // Impressao das buscas e resultados
         System.out.println( RED + "\n ---------------------------------------------- \n Busca em Profundidade: " + RESET);
         long inicio = System.nanoTime();
-        grafo.buscaProfundidade(0, 9999);
+        grafo.buscaProfundidade(0, 499);
         long fim = System.nanoTime(); // Marca o tempo final
         long tempoTotal = fim - inicio; // Calcula o tempo decorrido
         System.out.println("Tempo para encontrar: " + (tempoTotal / 1_000) + " µs");
 
         System.out.println(BLUE + "\n ---------------------------------------------- \n Busca em Largura: " + RESET);
         long inicioLargura = System.nanoTime();
-        grafo.buscaLargura(0, 9999);
+        grafo.buscaLargura(0, 499);
         long fimLargura = System.nanoTime(); // Marca o tempo final
         long tempoTotalLargura = fimLargura - inicioLargura; // Calcula o tempo decorrido
         System.out.println("Tempo para encontrar: " + (tempoTotalLargura / 1_000) + " µs");
 
         System.out.println(GREEN + "\n ---------------------------------------------- \n Busca em Profundidade Limitada: " + RESET);
         long inicioLimitada = System.nanoTime();
-        grafo.buscaProfundidadeLimitada(0, 9999, 50);
+        grafo.buscaProfundidadeLimitada(0, 499, 50);
         long fimLimitada = System.nanoTime(); // Marca o tempo final
         long tempoTotalLimitada = fimLimitada - inicioLimitada; // Calcula o tempo decorrido
         System.out.println("Tempo para encontrar: " + (tempoTotalLargura / 1_000) + " µs");

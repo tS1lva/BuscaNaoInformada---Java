@@ -96,6 +96,7 @@ public class Grafo {
     public void buscaProfundidade(int origem, int destino) {
         Stack<Integer> pilha = new Stack<>();
         Set<Integer> visitados = new HashSet<>();
+        List<Integer> caminhoPercorrido = new ArrayList<>();
         int interacoes = 0;
 
         pilha.push(origem);
@@ -106,10 +107,12 @@ public class Grafo {
             if (visitados.contains(atual)) continue;
 
             visitados.add(atual);
+            caminhoPercorrido.add(atual);
             interacoes++;
 
             if (atual == destino) {
                 System.out.println("Destino encontrado em " + interacoes + " interações.");
+                System.out.println("Caminho percorrido: " + caminhoPercorrido);
                 return;
             }
 
@@ -129,11 +132,13 @@ public class Grafo {
         }
 
         System.out.println("Destino não encontrado.");
+        System.out.println("Caminho percorrido: " + caminhoPercorrido);
     }
 
     public void buscaProfundidadeLimitada(int origem, int destino, int limite) {
         Stack<Par> pilha = new Stack<>();
         Set<Integer> visitados = new HashSet<>();
+        List<Integer> caminhoPercorrido = new ArrayList<>();
         int interacoes = 0;
 
         pilha.push(new Par(origem, 0));
@@ -146,10 +151,12 @@ public class Grafo {
             }
 
             visitados.add(atual.no);
+            caminhoPercorrido.add(atual.no);
             interacoes++;
 
             if (atual.no == destino) {
                 System.out.println("Destino encontrado em " + interacoes + " interações.");
+                System.out.println("Caminho percorrido: " + caminhoPercorrido);
                 return;
             }
 
@@ -171,11 +178,13 @@ public class Grafo {
         }
 
         System.out.println("Destino não encontrado dentro do limite de profundidade " + limite + ".");
+        System.out.println("Caminho percorrido: " + caminhoPercorrido);
     }
 
     public void buscaLargura(int origem, int destino) {
         Queue<Integer> fila = new LinkedList<>();
         Set<Integer> visitados = new HashSet<>();
+        List<Integer> caminhoPercorrido = new ArrayList<>();
         int interacoes = 0;
 
         fila.add(origem);
@@ -183,10 +192,12 @@ public class Grafo {
 
         while (!fila.isEmpty()) {
             int atual = fila.poll();
+            caminhoPercorrido.add(atual);
             interacoes++;
 
             if (atual == destino) {
                 System.out.println("Destino encontrado em " + interacoes + " interações.");
+                System.out.println("Caminho percorrido: " + caminhoPercorrido);
                 return;
             }
 
@@ -208,5 +219,6 @@ public class Grafo {
         }
 
         System.out.println("Destino não encontrado.");
+        System.out.println("Caminho percorrido: " + caminhoPercorrido);
     }
 }
